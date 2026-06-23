@@ -16,14 +16,8 @@ The goal is to understand customer segments, revenue trends, gender distribution
 
 
 
-## Screenshots
 
+## Dashboard Overview
 
-### Dashboard Overview
 ![Dashboard Preview](Screenshots/Dashboard.jpg)
 
-### Deliverables
-![Deliverables](Screenshots/Deliverables.jpg)
-
-### Problem Statement
-![Problem Statement](Screenshots/Problem%20Statement.jpg)
