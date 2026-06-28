@@ -73,7 +73,7 @@ with col1:
 with col2:
     st.metric(
         "Average Purchase",
-        f"{df['Purchase Amount (USD)'].mean():.2f} $"
+        f"{df['Purchase Amount (USD)'].mean():.2f} €"
     )
 
 with col3:
