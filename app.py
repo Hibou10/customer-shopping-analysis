@@ -2,38 +2,38 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# -------------------------------------------------
-# Page Config
-# -------------------------------------------------
+
 
 st.set_page_config(
     page_title="Customer Behavior Dashboard",
     layout="wide"
 )
 
-# -------------------------------------------------
 # Title
-# -------------------------------------------------
 
 st.title("🛒 Customer Behavior Dashboard")
 
-# -------------------------------------------------
+
 # Load Data
-# -------------------------------------------------
 
 df = pd.read_csv("customer_shopping_behavior.csv")
 
-# Age Groups
+# age_groups
 
-df["Age Group"] = pd.cut(
+labels = [
+    "Young adults",
+    "Adult",
+    "Middle-aged",
+    "Senior"
+]
+
+df["age_group"] = pd.qcut(
     df["Age"],
-    bins=[17, 30, 45, 60, 100],
-    labels=["Young adults", "Adult", "Middle-aged", "Senior"]
+    q=4,
+    labels=labels
 )
 
-# -------------------------------------------------
 # Sidebar
-# -------------------------------------------------
 
 st.sidebar.header("Filter")
 
@@ -61,9 +61,7 @@ df = df[
     (df["Category"].isin(category))
 ]
 
-# -------------------------------------------------
 # KPIs
-# -------------------------------------------------
 
 st.subheader("KPIs")
 
@@ -84,9 +82,7 @@ with col3:
         round(df["Review Rating"].mean(), 2)
     )
 
-# -------------------------------------------------
 # TOP CHARTS
-# -------------------------------------------------
 
 left, middle, right = st.columns(3)
 
@@ -123,7 +119,6 @@ with middle:
     revenue = (
         df.groupby("Category")["Purchase Amount (USD)"]
         .sum()
-        .sort_values(ascending=False)
         .reset_index()
     )
 
@@ -176,9 +171,9 @@ with right:
         config={"displayModeBar": False}
     )
 
-# -------------------------------------------------
+
 # BOTTOM CHARTS
-# -------------------------------------------------
+
 
 bottom_left, bottom_right = st.columns(2)
 
@@ -186,16 +181,29 @@ bottom_left, bottom_right = st.columns(2)
 
 with bottom_left:
 
-    revenue_age = (
-        df.groupby("Age Group")["Purchase Amount (USD)"]
+    revenue = (
+        df.groupby("age_group")["Purchase Amount (USD)"]
         .sum()
         .reset_index()
     )
 
+    revenue["age_group"] = pd.Categorical(
+        revenue["age_group"],
+        categories=[
+            "Young adults",
+            "Middle-aged",
+            "Adult",
+            "Senior"
+        ],
+        ordered=True
+    )
+
+    revenue = revenue.sort_values("age_group")
+
     fig = px.bar(
-        revenue_age,
+        revenue,
         x="Purchase Amount (USD)",
-        y="Age Group",
+        y="age_group",
         orientation="h",
         color_discrete_sequence=["#2b2bb2"]
     )
@@ -208,6 +216,8 @@ with bottom_left:
         yaxis_title=""
     )
 
+    fig.update_yaxes(autorange="reversed")
+
     st.plotly_chart(
         fig,
         use_container_width=True,
@@ -219,15 +229,28 @@ with bottom_left:
 with bottom_right:
 
     sales_age = (
-        df.groupby("Age Group")
+        df.groupby("age_group")
         .size()
         .reset_index(name="Sales")
     )
 
+    sales_age["age_group"] = pd.Categorical(
+        sales_age["age_group"],
+        categories=[
+            "Young adults",
+            "Middle-aged",
+            "Senior",
+            "Adult"
+        ],
+        ordered=True
+    )
+
+    sales_age = sales_age.sort_values("age_group")
+
     fig = px.bar(
         sales_age,
         x="Sales",
-        y="Age Group",
+        y="age_group",
         orientation="h",
         color_discrete_sequence=["#2b2bb2"]
     )
@@ -239,6 +262,9 @@ with bottom_right:
         xaxis_title="",
         yaxis_title=""
     )
+
+    
+    fig.update_yaxes(autorange="reversed")
 
     st.plotly_chart(
         fig,
